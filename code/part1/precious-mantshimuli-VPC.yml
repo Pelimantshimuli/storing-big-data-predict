@@ -1,0 +1,156 @@
+Description:  This template deploys a VPC, with a pair of public and private subnets spread
+  across two Availability Zones. It deploys an internet gateway, with a default
+  route on the public subnets. It deploys a pair of NAT gateways (one in each AZ),
+  and default routes for them in the private subnets.
+
+Parameters:
+  EnvironmentName: 
+    Description: An environment name that is prefixed to resource names
+    Type: String
+    Default: DE-Extract
+
+  VpcCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 192.168.0.0/16
+
+  DataCenterPublicSubnetCIDR:
+    Description: The IPv4 address space, again given in CIDR notation, for the publicly accessible portion of the VPC
+    Type: String
+    Default: 192.168.10.0/24
+
+
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+
+  DataCenterPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref DataCenterPublicSubnetCIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: DE-Extract Data Center Subnet
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: DE-Extract Public Routes
+    
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  DataCenterPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref DataCenterPublicSubnet
+
+   WindowsInstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupName: DE-Extract-WindowsInstanceSG
+      GroupDescription: Security group for Windows instances permitting RDP access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: DE-Extract-WindowsInstanceSG
+
+   FileServerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupName: DE-Extract-FileServerSG
+      GroupDescription: Security group for file server permitting SSH access from within the VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 192.168.10.0/24
+      Tags:
+        - Key: Name
+          Value: DE-Extract-FileServerSG   
+
+   FileGatewaySG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupName: DE-Extract-FileGatewaySG
+      GroupDescription: Security group for file gateway permitting all TCP traffic within the VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 1
+          ToPort: 65534
+          CidrIp: 192.168.0.0/16
+      Tags:
+        - Key: Name
+          Value: DE-Extract-FileGatewaySG
+    
+
+Outputs:
+  VPCId:
+    Description: The ID of the VPC
+    Value: !Ref VPC
+
+  DataCenterPublicSubnetId:
+    Description: The ID of the public subnet in the data center
+    Value: !Ref DataCenterPublicSubnet
+
+  InternetGatewayId:
+    Description: The ID of the Internet Gateway
+    Value: !Ref InternetGateway
+
+  WindowsInstanceSecurityGroupId:
+    Description: The ID of the Windows Instance Security Group
+    Value: !Ref WindowsInstanceSG
+
+  FileServerSecurityGroupId:
+    Description: The ID of the File Server Security Group
+    Value: !Ref FileServerSG
+
+  FileGatewaySecurityGroupId:
+    Description: The ID of the File Gateway Security Group
+    Value: !Ref FileGatewaySG
+
+
+
+
+  
