@@ -79,7 +79,7 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref DataCenterPublicSubnet
 
-   WindowsInstanceSG:
+  WindowsInstanceSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref VPC
