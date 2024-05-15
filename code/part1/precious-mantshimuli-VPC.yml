@@ -1,3 +1,4 @@
+AWSTemplateFormartVersion: 2010-09-09
 Description:  This template deploys a VPC, with a pair of public and private subnets spread
   across two Availability Zones. It deploys an internet gateway, with a default
   route on the public subnets. It deploys a pair of NAT gateways (one in each AZ),
@@ -125,30 +126,6 @@ Resources:
           Value: DE-Extract-FileGatewaySG
     
 
-Outputs:
-  VPCId:
-    Description: The ID of the VPC
-    Value: !Ref VPC
-
-  DataCenterPublicSubnetId:
-    Description: The ID of the public subnet in the data center
-    Value: !Ref DataCenterPublicSubnet
-
-  InternetGatewayId:
-    Description: The ID of the Internet Gateway
-    Value: !Ref InternetGateway
-
-  WindowsInstanceSecurityGroupId:
-    Description: The ID of the Windows Instance Security Group
-    Value: !Ref WindowsInstanceSG
-
-  FileServerSecurityGroupId:
-    Description: The ID of the File Server Security Group
-    Value: !Ref FileServerSG
-
-  FileGatewaySecurityGroupId:
-    Description: The ID of the File Gateway Security Group
-    Value: !Ref FileGatewaySG
 
 
 
