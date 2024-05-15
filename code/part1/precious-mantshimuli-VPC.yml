@@ -1,4 +1,3 @@
-AWSTemplateFormartVersion: 2010-09-09
 Description:  This template deploys a VPC, with a pair of public and private subnets spread
   across two Availability Zones. It deploys an internet gateway, with a default
   route on the public subnets. It deploys a pair of NAT gateways (one in each AZ),
@@ -19,7 +18,6 @@ Parameters:
     Description: The IPv4 address space, again given in CIDR notation, for the publicly accessible portion of the VPC
     Type: String
     Default: 192.168.10.0/24
-
 
 
 Resources:
@@ -100,15 +98,15 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       GroupName: DE-Extract-FileServerSG
-      GroupDescription: Security group for file server permitting SSH access from within the VPC
+      GroupDescription: Security group for file server permitting SSH access from internal sources within the VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 192.168.10.0/24
+          CidrIp: 192.168.10.0/24 # Allow access only from the public subnet
       Tags:
         - Key: Name
-          Value: DE-Extract-FileServerSG   
+          Value: DE-Extract-FileServerSG 
 
   FileGatewaySG:
     Type: AWS::EC2::SecurityGroup
@@ -121,6 +119,7 @@ Resources:
           FromPort: 1
           ToPort: 65534
           CidrIp: 192.168.0.0/16
+      
       Tags:
         - Key: Name
           Value: DE-Extract-FileGatewaySG
