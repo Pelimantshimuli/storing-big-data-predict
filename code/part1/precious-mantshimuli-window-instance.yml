@@ -78,11 +78,3 @@ Resources:
         - Key: Name
           Value: DE-Extract-Windows-Instance
 
-Outputs:
-  InstanceId:
-    Description: The Instance Id of the Windows instance
-    Value: !Ref WindowsInstance
-
-  PublicIp:
-    Description: The Public IP address of the Windows instance
-    Value: !GetAtt WindowsInstance.PublicIp
