@@ -94,7 +94,7 @@ Resources:
         - Key: Name
           Value: DE-Extract-WindowsInstanceSG
 
-   FileServerSG:
+  FileServerSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref VPC
@@ -109,7 +109,7 @@ Resources:
         - Key: Name
           Value: DE-Extract-FileServerSG   
 
-   FileGatewaySG:
+  FileGatewaySG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref VPC
